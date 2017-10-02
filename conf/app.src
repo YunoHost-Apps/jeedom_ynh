@@ -1,0 +1,6 @@
+SOURCE_URL=https://github.com/jeedom/core/archive/3.1.tar.gz
+SOURCE_SUM=9f3eafb76402f43fe9d4d459276ec7b267d0a0495c499f073c2da1737d238cd9
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=3.1.tar.gz

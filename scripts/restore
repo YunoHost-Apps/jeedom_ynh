@@ -1,0 +1,142 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+if [ ! -e _common.sh ]; then
+	# Get the _common.sh file if it's not in the current directory
+	cp ../settings/scripts/_common.sh ./_common.sh
+	chmod a+rx _common.sh
+fi
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get $app domain)
+path_url=$(ynh_app_setting_get $app path)
+final_path=$(ynh_app_setting_get $app final_path)
+db_name=$(ynh_app_setting_get $app db_name)
+sudo=$(ynh_app_setting_get $app sudo)
+
+#=================================================
+# CHECK IF THE APP CAN BE RESTORED
+#=================================================
+
+ynh_webpath_available $domain $path_url \
+	|| ynh_die "Path not available: ${domain}${path_url}"
+test ! -d $final_path \
+	|| ynh_die "There is already a directory: $final_path "
+
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+
+ynh_restore_file "$final_path"
+
+#=================================================
+# RESTORE THE MYSQL DATABASE
+#=================================================
+
+db_pwd=$(ynh_app_setting_get $app mysqlpwd)
+ynh_mysql_setup_db $db_name $db_name $db_pwd
+ynh_mysql_connect_as $db_name $db_pwd $db_name < ./db.sql
+
+#=================================================
+# RECREATE THE DEDICATED USER
+#=================================================
+
+# Create the dedicated user (if not existing)
+ynh_system_user_create $app
+
+# For nginx user to be able to communicate with home automation devices
+	if [ $(getent group dialout) ]; then
+		sudo usermod -a -G dialout $app
+	fi
+	if [ $(getent group gpio) ]; then
+		sudo usermod -a -G gpio $app
+	fi
+	if [ $(getent group tty) ]; then
+		sudo usermod -a -G tty $app
+	fi
+
+# Sudo permissions to the user if agreed to
+	if [ $sudo ]; then
+		sudo usermod -a -G sudo $app
+		if [ $(sudo grep "$app ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
+			sudo bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
+		fi
+	fi
+
+#=================================================
+# RESTORE USER RIGHTS
+#=================================================
+
+# Restore permissions on app files
+chown -R $app: $final_path
+chmod 775 -R $final_path
+
+# Create tmp required by Jeedom
+mkdir -p /tmp/jeedom
+chmod 777 -R /tmp/jeedom
+
+#=================================================
+# RESTORE THE PHP-FPM CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/php5/fpm/pool.d/$app.conf"
+ynh_restore_file "/etc/php5/fpm/conf.d/20-$app.ini"
+
+#=================================================
+# REINSTALL DEPENDENCIES
+#=================================================
+
+# Define and install dependencies
+#ynh_install_app_dependencies ntp usb-modeswitch python-serial
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add $app --log "/var/log/$app/APP.log"
+
+#=================================================
+# RESTORE THE CRON FILES
+#=================================================
+
+ynh_restore_file "/etc/cron.d/${app}"
+ynh_restore_file "/etc/cron.d/${app}_watchdog"
+
+#=================================================
+# RESTORE THE LOGROTATE CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/logrotate.d/$app"
+
+#=================================================
+# RELOAD NGINX AND PHP-FPM
+#=================================================
+
+systemctl reload php5-fpm
+systemctl reload nginx
+

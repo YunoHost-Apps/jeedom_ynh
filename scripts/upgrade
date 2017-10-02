@@ -1,0 +1,176 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get $app domain)
+path_url=$(ynh_app_setting_get $app path)
+admin=$(ynh_app_setting_get $app admin)
+final_path=$(ynh_app_setting_get $app final_path)
+port=$(ynh_app_setting_get $app port)
+db_name=$(ynh_app_setting_get $app db_name)
+sudo=$(ynh_app_setting_get $app sudo)
+
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+
+# Fix is_public as a boolean value
+if [ "$sudo" = "Yes" ]; then
+	ynh_app_setting_set $app sudo 1
+	sudo=1
+	# Removes sudo to www-data
+	if [ $(sudo grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
+			sudo sed -i "/www-data ALL=(ALL) NOPASSWD: ALL/d" /etc/sudoers
+	fi
+elif [ "$sudo" = "No" ]; then
+	ynh_app_setting_set $app sudo 0
+	sudo=0
+fi
+
+# If db_name doesn't exist, create it
+if [ -z $db_name ]; then
+	db_name=$(ynh_sanitize_dbid $app)
+	ynh_app_setting_set $app db_name $db_name
+fi
+
+# If final_path doesn't exist, create it
+if [ -z $final_path ]; then
+	final_path=/var/www/$app
+	ynh_app_setting_set $app final_path $final_path
+fi
+
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+
+# Backup the current version of the app
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+	# restore it if the upgrade fails
+	ynh_restore_upgradebackup
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# CHECK THE PATH
+#=================================================
+
+# Normalize the URL path syntax
+path_url=$(ynh_normalize_url_path $path_url)
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source "$final_path"
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+# Create a dedicated nginx config
+ynh_add_nginx_config
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+# Create a system user
+ynh_system_user_create $app
+
+# For nginx user to be able to communicate with home automation devices
+	if [ $(getent group dialout) ]; then
+		sudo usermod -a -G dialout $app
+	fi
+	if [ $(getent group gpio) ]; then
+		sudo usermod -a -G gpio $app
+	fi
+	if [ $(getent group tty) ]; then
+		sudo usermod -a -G tty $app
+	fi
+
+# Sudo permissions to the user if agreed to
+	if [ $sudo ]; then
+		sudo usermod -a -G sudo $app
+		if [ $(sudo grep "$app ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
+			sudo bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
+		fi
+	fi
+
+#=================================================
+# PHP-FPM CONFIGURATION
+#=================================================
+
+# Create a dedicated php-fpm config
+ynh_add_fpm_config
+
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+
+# Upgrade Jeedom	
+sudo php $final_path/install/install.php mode=force
+
+# Cron
+echo "* * * * * $app /usr/bin/php -f $final_path/core/php/jeeCron.php" > cronjeedom
+sudo mv cronjeedom /etc/cron.d/${app}
+sudo chown root /etc/cron.d/${app}
+
+echo "* * * * * $app /usr/bin/php -f $final_path/core/php/watchdog.php" > cronjeedom_watchdog
+sudo mv cronjeedom_watchdog /etc/cron.d/${app}_watchdog
+sudo chown root /etc/cron.d/${app}_watchdog
+
+# Check
+#sudo php $final_path/install/sick.php
+
+#=================================================
+# SECURE FILES AND DIRECTORIES
+#=================================================
+
+# Set permissions to app files
+chown -R $app: $final_path
+chmod 775 -R $final_path
+
+# Create tmp required by Jeedom
+mkdir -p /tmp/jeedom
+chmod 777 -R /tmp/jeedom
+
+#=================================================
+# SETUP LOGROTATE
+#=================================================
+
+# Use logrotate to manage app-specific logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+
+# Remove the public access
+ynh_app_setting_delete $app skipped_uris
+
+
+# Access to API without SSO
+ynh_app_setting_set "$app" unprotected_uris "/core/api/jeeApi.php"
+
+#=================================================
+# RELOAD NGINX
+#=================================================
+
+systemctl reload nginx
+

@@ -1,0 +1,95 @@
+#!/bin/bash
+
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
+domain=$(ynh_app_setting_get $app domain)
+port=$(ynh_app_setting_get $app port)
+db_name=$(ynh_app_setting_get $app db_name)
+db_pwd=$(ynh_app_setting_get $app db_pwd)
+final_path=$(ynh_app_setting_get $app final_path)
+
+#=================================================
+# REMOVE SERVICE FROM ADMIN PANEL
+#=================================================
+
+if yunohost service status | grep -q $app
+then
+	echo "Remove $app service"
+	yunohost service remove $app
+fi
+
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
+
+# Remove metapackage and its dependencies
+#ynh_remove_app_dependencies
+
+#=================================================
+# REMOVE THE MYSQL DATABASE
+#=================================================
+
+# Remove a database if it exists, along with the associated user
+ynh_mysql_remove_db $db_name $db_name
+
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
+
+# Remove the app directory securely
+ynh_secure_remove "$final_path"
+
+#=================================================
+# REMOVE NGINX CONFIGURATION
+#=================================================
+
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
+
+#=================================================
+# REMOVE PHP-FPM CONFIGURATION
+#=================================================
+
+# Remove the dedicated php-fpm config
+ynh_remove_fpm_config
+
+#=================================================
+# REMOVE LOGROTATE CONFIGURATION
+#=================================================
+
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
+
+#=================================================
+# REMOVE THE CRON FILE
+#=================================================
+
+# Remove cron files
+ynh_secure_remove "/etc/cron.d/${app}"
+ynh_secure_remove "/etc/cron.d/${app}_watchdog"
+
+# Remove the log files
+ynh_secure_remove "/var/log/$app/"
+
+# Remove the tmp files
+ynh_secure_remove "/tmp/jeedom/"
+
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
+
+# Delete a system user
+ynh_system_user_delete $app
+

@@ -1,0 +1,65 @@
+{
+	"name": "Jeedom",
+	"id": "jeedom",
+	"packaging_format": 1,
+	"description": {
+		"en": "Jeedom is a home automation application",
+		"fr": "Jeedom est une application de domotique"
+	},
+	"version": "1.0",
+	"url": "http://www.jeedom.fr/",
+	"license": "free",
+	"maintainer": {
+		"name": "scith",
+		"url": "https://github.com/scith"
+	},
+	"requirements": {
+        "yunohost": ">= 2.7.2"
+	},
+	"multi_instance": false,
+	"services": [
+        "nginx",
+        "php5-fpm",
+        "mysql"
+    ],
+	"arguments": {
+		"install": [
+		{
+			"name": "domain",
+			"type":"domain",
+			"ask": {
+				"en": "Choose a domain for Jeedom",
+				"fr": "Choisissez un domaine pour Jeedom"
+			},
+			"example": "domain.org"
+		},
+		{
+			"name": "path",
+			"ask": {
+			  "en": "Choose a path for Jeedom",
+			  "fr": "Choisissez un chemin pour Jeedom"
+			},
+			"example": "/jeedom",
+			"default": "/jeedom"
+		},
+		{
+			"name": "admin",
+			"type": "user",
+			"ask": {
+			  "en": "Choose a YunoHost user to be admin",
+			  "fr": "Choisissez un utilisateur YunoHost pour être admin"
+			},
+			"example": "johndoe"
+		},
+		{
+			"name": "sudo",
+			"type": "boolean",
+			"ask": {
+			  "en": "Do you agree giving sudo rights to the Jeedom user? This is required for most Jeedom features to work. However, attackers could use vulnerabilities in Jeedom to take control of your server.",
+			  "fr": "Acceptez-vous de donner les droits sudo à l'utilisateur Jeedom ? Ces droits sont nécessaires au bon fonctionnement de Jeedom. Toutefois, des attaquants pourraient exploiter des failles de Jeedom pour prendre le controle de votre serveur."
+			},
+			"default": true
+		}
+		]
+	}
+}
