@@ -1,6 +1,8 @@
 Jeedom for YunoHost
 ========
 
+[![Integration level](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+
 Jeedom is an home automation software.
 
 ![Jeedom](https://www.jeedom.com/site/img/01-Appli-jeedom.png)
