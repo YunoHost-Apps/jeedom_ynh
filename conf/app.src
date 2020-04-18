@@ -1,5 +1,5 @@
-SOURCE_URL=https://github.com/jeedom/core/archive/3.1.tar.gz
-SOURCE_SUM=9f3eafb76402f43fe9d4d459276ec7b267d0a0495c499f073c2da1737d238cd9
+SOURCE_URL=https://github.com/jeedom/core/archive/6d050fc167ad7845d174a9b0b9d82009d92439b3.tar.gz
+SOURCE_SUM=44cf984b8375a5e4cd05d9bcc17ceff97690790b909f20951274a69443e4f06c
 SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
