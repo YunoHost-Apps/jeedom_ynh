@@ -1,26 +1,44 @@
 Jeedom for YunoHost
 ========
 
-[![Integration level](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+[![Integration level](https://dash.yunohost.org/integration/REPLACEBYYOURAPP.svg)](https://dash.yunohost.org/appci/app/REPLACEBYYOURAPP)  
+[![Install REPLACEBYYOURAPP with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=REPLACEBYYOURAPP)
 
+> *This package allow you to install REPLACEBYYOURAPP quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
+
+## Overview
 Jeedom is an home automation software.
+
+**Shipped version:** 3.3.45
+
+## Screenshots
 
 ![Jeedom](https://www.jeedom.com/site/img/01-Appli-jeedom.png)
 
+## YunoHost specific features
 
-This application is installing Jeedom on a [YunoHost server](https://yunohost.org/#/).
+#### Multi-users support
 
-**Main features of jeedom_ynh**:
+- LDAP login: your YunoHost users also become Jeedom users
+## Links
 
-- Automatic installation and upgrade of Jeedom
-- SSO login: your YunoHost users also become Jeedom users
-- Backup and restore scripts
+ * Report a bug: https://github.com/YunoHost-Apps/REPLACEBYYOURAPP_ynh/issues
+ * App website: https://www.jeedom.com/
+ * Upstream app repository: https://github.com/jeedom/core
+ * YunoHost website: https://yunohost.org/
 
+---
 
-**Current version**: [See in the app.src](conf/app.src)
+Developers info
+----------------
 
-More information about Jeedom : https://www.jeedom.com/
+**Only if you want to use a testing branch for coding, instead of merging directly into master.**
+Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/REPLACEBYYOURAPP_ynh/tree/testing).
 
-More information about Yunohost : https://yunohost.org/#/
-
-Thanks @Lunarok for the hard work!
+To try the testing branch, please proceed like that.
+```
+sudo yunohost app install https://github.com/YunoHost-Apps/REPLACEBYYOURAPP_ynh/tree/testing --debug
+or
+sudo yunohost app upgrade REPLACEBYYOURAPP -u https://github.com/YunoHost-Apps/REPLACEBYYOURAPP_ynh/tree/testing --debug
+```
