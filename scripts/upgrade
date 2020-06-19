@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -26,14 +26,14 @@ sudo=$(ynh_app_setting_get --app=$app --key=sudo)
 #=================================================
 # CHECK VERSION
 #=================================================
-ynh_print_info --message="Checking version..."
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_print_info --message="Ensuring downward compatibility..."
+ynh_script_progression --message="Ensuring downward compatibility..."
 
 # Fix is_public as a boolean value
 if [ "$sudo" = "Yes" ]; then
@@ -63,7 +63,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_print_info --message="Backing up the app before upgrading (may take a while)..."
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -79,7 +79,7 @@ ynh_abort_if_errors
 #=================================================
 
 # Normalize the URL path syntax
-path_url=$(ynh_normalize_url_path $path_url)
+path_url=$(ynh_normalize_url_path --path_url=$path_url)
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -89,7 +89,7 @@ path_url=$(ynh_normalize_url_path $path_url)
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_print_info --message="Upgrading source files..."
+	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path"
@@ -98,7 +98,7 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -106,41 +106,41 @@ ynh_add_nginx_config
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_print_info --message="Upgrading dependencies..."
+ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app
 
 # For nginx user to be able to communicate with home automation devices
 	if [ $(getent group dialout) ]; then
-		sudo usermod -a -G dialout $app
+		usermod -a -G dialout $app
 	fi
 	if [ $(getent group gpio) ]; then
-		sudo usermod -a -G gpio $app
+		usermod -a -G gpio $app
 	fi
 	if [ $(getent group tty) ]; then
-		sudo usermod -a -G tty $app
+		usermod -a -G tty $app
 	fi
 
 # Sudo permissions to the user if agreed to
 	if [ $sudo ]; then
-		sudo usermod -a -G sudo $app
-		if [ $(sudo grep "$app ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-			sudo bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
+		usermod -a -G sudo $app
+		if [ $(grep "$app ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
+			bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
 		fi
 	fi
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_print_info --message="Upgrading php-fpm configuration..."
+ynh_script_progression --message="Upgrading php-fpm configuration..."
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
@@ -150,10 +150,10 @@ ynh_add_fpm_config
 #=================================================
 # UPGRADE JEEDOM
 #=================================================
-ynh_print_info --message="Upgrading Jeedom..."
+ynh_script_progression --message="Upgrading Jeedom..."
 
 # Upgrade Jeedom	
-sudo php $final_path/install/install.php mode=force
+php $final_path/install/install.php mode=force
 
 # Cron
 echo "* * * * * $app /usr/bin/php -f $final_path/core/php/jeeCron.php" > cronjeedom
@@ -161,18 +161,18 @@ sudo mv cronjeedom /etc/cron.d/${app}
 sudo chown root /etc/cron.d/${app}
 
 echo "* * * * * $app /usr/bin/php -f $final_path/core/php/watchdog.php" > cronjeedom_watchdog
-sudo mv cronjeedom_watchdog /etc/cron.d/${app}_watchdog
-sudo chown root /etc/cron.d/${app}_watchdog
+mv cronjeedom_watchdog /etc/cron.d/${app}_watchdog
+chown root /etc/cron.d/${app}_watchdog
 
 # Check
-#sudo php $final_path/install/sick.php
+#php $final_path/install/sick.php
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_print_info --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app: $final_path
@@ -185,12 +185,10 @@ chmod 777 -R /tmp/jeedom
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_print_info --message="Upgrading SSOwat configuration..."
-
+ynh_script_progression --message="Upgrading SSOwat configuration..."
 
 # Remove the public access
 ynh_app_setting_delete --app=$app --key=skipped_uris
-
 
 # Access to API without SSO
 ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/core/api/jeeApi.php"
@@ -198,7 +196,7 @@ ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/core/api/jeeAp
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -206,4 +204,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Upgrade of $app completed"
+ynh_script_progression --message="Upgrade of $app completed"

@@ -1,11 +1,10 @@
 Jeedom for YunoHost
-========
 
-[![Integration level](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom)  
+[![Integration level](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)  
 [![Install Jeedom with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jeedom)
 
-> *This package allow you to install Jeedom quickly and simply on a YunoHost server.  
-If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
+> *This package allows you to install Jeedom quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/install) to learn how to install it.*
 
 ## Overview
 Jeedom is an home automation software.
@@ -18,7 +17,7 @@ Jeedom is an home automation software.
 
 ## YunoHost specific features
 
-#### Multi-users support
+#### Multi-user support
 
 - LDAP login: your YunoHost users also become Jeedom users
 
@@ -36,11 +35,10 @@ Jeedom is an home automation software.
 
 ---
 
-Developers info
+Developer info
 ----------------
 
-**Only if you want to use a testing branch for coding, instead of merging directly into master.**
-Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/jeedom_ynh/tree/testing).
+Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/jeedom_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
 ```
