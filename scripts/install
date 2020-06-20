@@ -12,7 +12,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
-ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
 	true
@@ -23,7 +22,6 @@ ynh_abort_if_errors
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
-ynh_print_info --message="Retrieving arguments from the manifest..."
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
@@ -35,7 +33,7 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_print_info --message="Validating installation parameters..."
+ynh_script_progression --message="Validating installation parameters..."
 
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
@@ -46,7 +44,7 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_print_info --message="Storing installation settings..."
+ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
@@ -56,14 +54,14 @@ ynh_app_setting_set --app=$app --key=sudo --value=$sudo
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_print_info --message="Installing dependencies..."
+ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE A MYSQL DATABASE
 #=================================================
-ynh_print_info --message="Creating a MySQL database..."
+ynh_script_progression --message="Creating a MySQL database..."
 
 db_name=$(ynh_sanitize_dbid --db_name=$app)
 db_user=$db_name
@@ -73,7 +71,7 @@ ynh_mysql_setup_db --db_user=$db_user --db_name=$db_name
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_print_info --message="Setting up source files..."
+ynh_script_progression --message="Setting up source files..."
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -82,7 +80,7 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring nginx web server..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -90,34 +88,34 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Configuring system user..."
+ynh_script_progression --message="Configuring system user..."
 
 # Create a system user
-ynh_system_user_create $app
+ynh_system_user_create --username=$app
 
 # For nginx user to be able to communicate with home automation devices
 	if [ $(getent group dialout) ]; then
-		sudo usermod -a -G dialout $app
+		usermod -a -G dialout $app
 	fi
 	if [ $(getent group gpio) ]; then
-		sudo usermod -a -G gpio $app
+		usermod -a -G gpio $app
 	fi
 	if [ $(getent group tty) ]; then
-		sudo usermod -a -G tty $app
+		usermod -a -G tty $app
 	fi
 
 # Sudo permissions to the user if agreed to
 	if [ $sudo ]; then
-		sudo usermod -a -G sudo $app
+		usermod -a -G sudo $app
 		if [ $(sudo grep "$app ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-			sudo bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
+			bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
 		fi
 	fi
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_print_info --message="Configuring php-fpm..."
+ynh_script_progression --message="Configuring php-fpm..."
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
@@ -127,7 +125,7 @@ ynh_add_fpm_config
 #=================================================
 # INSTALL JEEDOM
 #=================================================
-ynh_print_info --message="Installing Jeedom..."
+ynh_script_progression --message="Installing Jeedom..."
 
 # Configure Jeedom database and initialize app
 ynh_replace_string "#DBNAME#" "$db_name" ../conf/common.config.php
@@ -157,7 +155,7 @@ sudo chown root /etc/cron.d/${app}_watchdog
 #=================================================
 # STORE THE CONFIG FILE CHECKSUM
 #=================================================
-ynh_print_info --message="Storing the config file checksum..."
+ynh_script_progression --message="Storing the config file checksum..."
 
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum --file="$final_path/core/config/common.config.php"
@@ -167,7 +165,7 @@ ynh_store_file_checksum --file="$final_path/core/config/common.config.php"
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
-ynh_print_info --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app: $final_path
@@ -180,11 +178,10 @@ chmod 777 -R /tmp/jeedom
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_print_info --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring SSOwat..."
 
 # Remove the public access
 ynh_app_setting_delete --app=$app --key=skipped_uris
-
 
 # Access to API without SSO
 ynh_app_setting_set --app=$app --key=unprotected_uris --value="/core/api/jeeApi.php"
@@ -192,7 +189,7 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/core/api/jeeApi.
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -200,4 +197,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Installation of $app completed"
+ynh_script_progression --message="Installation of $app completed"
