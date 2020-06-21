@@ -1,0 +1,1 @@
+* * * * * root  /usr/bin/php__PHPVERSION__ -f __FINALPATH__/core/php/watchdog.php

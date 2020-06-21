@@ -64,24 +64,21 @@ ynh_script_progression --message="Removing php-fpm configuration..."
 ynh_remove_fpm_config
 
 #=================================================
-# REMOVE THE CRON FILE
+# SPECIFIC REMOVE
 #=================================================
-ynh_script_progression --message="Removing the cron file..."
+# REMOVE VARIOUS FILES
+#=================================================
+ynh_script_progression --message="Removing various files..."
 
 # Remove cron files
 ynh_secure_remove --file="/etc/cron.d/${app}"
 ynh_secure_remove --file="/etc/cron.d/${app}_watchdog"
 
+# Remove cron files
+ynh_secure_remove --file="/tmp/jeedom"
+
 #=================================================
 # GENERIC FINALIZATION
-#=================================================
-# REMOVE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Removing the dedicated system user..."
-
-# Delete a system user
-ynh_system_user_delete --username=$app
-
 #=================================================
 # END OF SCRIPT
 #=================================================

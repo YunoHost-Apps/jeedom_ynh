@@ -40,8 +40,8 @@ if [ "$sudo" = "Yes" ]; then
 	ynh_app_setting_set --app=$app --key=sudo --value=1
 	sudo=1
 	# Removes sudo to www-data
-	if [ $(sudo grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-			sudo sed -i "/www-data ALL=(ALL) NOPASSWD: ALL/d" /etc/sudoers
+	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
+			sed -i "/www-data ALL=(ALL) NOPASSWD: ALL/d" /etc/sudoers
 	fi
 elif [ "$sudo" = "No" ]; then
 	ynh_app_setting_set --app=$app --key=sudo --value=0
@@ -111,31 +111,12 @@ ynh_script_progression --message="Upgrading dependencies..."
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
-# CREATE DEDICATED USER
+# UPGRADE EXTRA DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+ynh_print_info --message="Upgrading extra dependencies ..."
 
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app
-
-# For nginx user to be able to communicate with home automation devices
-	if [ $(getent group dialout) ]; then
-		usermod -a -G dialout $app
-	fi
-	if [ $(getent group gpio) ]; then
-		usermod -a -G gpio $app
-	fi
-	if [ $(getent group tty) ]; then
-		usermod -a -G tty $app
-	fi
-
-# Sudo permissions to the user if agreed to
-	if [ $sudo ]; then
-		usermod -a -G sudo $app
-		if [ $(grep "$app ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-			bash -c 'echo "'${app}' ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
-		fi
-	fi
+lsb_name="$(lsb_release --codename --short)"
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
 # PHP-FPM CONFIGURATION
@@ -144,25 +125,50 @@ ynh_script_progression --message="Upgrading php-fpm configuration..."
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
+phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 #=================================================
 # SPECIFIC UPGRADE
+#=================================================
+# CONFIGURING RIGHTS
+#=================================================
+ynh_script_progression --message="Configuring rights..."
+
+# Create tmp required by Jeedom
+mkdir -p /tmp/jeedom
+chmod 777 -R /tmp/jeedom
+chown www-data:www-data -R /tmp/jeedom
+
+# For nginx user to be able to communicate with home automation devices
+if [ $(getent group dialout) ]; then
+	usermod -a -G dialout www-data
+fi
+if [ $(getent group gpio) ]; then
+	usermod -a -G gpio www-data
+fi
+if [ $(getent group tty) ]; then
+	usermod -a -G tty www-data
+fi
+
+# Sudo permissions to the user if agreed to
+if [ $sudo ]; then
+	usermod -a -G sudo www-data
+	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
+		bash -c 'echo "www-data ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
+	fi
+fi
+
 #=================================================
 # UPGRADE JEEDOM
 #=================================================
 ynh_script_progression --message="Upgrading Jeedom..."
 
 # Upgrade Jeedom	
-php $final_path/install/install.php mode=force
+php$phpversion $final_path/install/install.php mode=force
 
 # Cron
-echo "* * * * * $app /usr/bin/php -f $final_path/core/php/jeeCron.php" > cronjeedom
-sudo mv cronjeedom /etc/cron.d/${app}
-sudo chown root /etc/cron.d/${app}
-
-echo "* * * * * $app /usr/bin/php -f $final_path/core/php/watchdog.php" > cronjeedom_watchdog
-mv cronjeedom_watchdog /etc/cron.d/${app}_watchdog
-chown root /etc/cron.d/${app}_watchdog
+ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
+ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
 
 # Check
 #php $final_path/install/sick.php
@@ -175,12 +181,12 @@ chown root /etc/cron.d/${app}_watchdog
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chown -R $app: $final_path
 chmod 775 -R $final_path
+chown -R www-data:www-data $final_path
 
 # Create tmp required by Jeedom
-mkdir -p /tmp/jeedom
 chmod 777 -R /tmp/jeedom
+chown www-data:www-data -R /tmp/jeedom
 
 #=================================================
 # SETUP SSOWAT
