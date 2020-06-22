@@ -3,8 +3,8 @@
 	"id": "jeedom",
 	"packaging_format": 1,
 	"description": {
-		"en": "Jeedom is a home automation application",
-		"fr": "Jeedom est une application de domotique"
+		"en": "Home automation application",
+		"fr": "Application de domotique"
 	},
 	"version": "3.3.45~ynh1",
 	"url": "http://www.jeedom.fr/",
