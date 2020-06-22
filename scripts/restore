@@ -93,7 +93,7 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_print_info --message="Reinstalling extra dependencies ..."
 
 lsb_name="$(lsb_release --codename --short)"
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name non-free" --package="$extra_pkg_dependencies"
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name contrib non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
 # CONFIGURING RIGHTS

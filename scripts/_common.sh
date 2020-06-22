@@ -15,10 +15,10 @@ apt-transport-https \
 xvfb cutycapt xauth \
 duplicity \
 at \
-php-curl php-gd php-imap php-xml php-opcache php-soap php-xmlrpc php-common php-dev php-zip php-ssh2 php-mbstring php-ldap"
+php-curl php-gd php-imap php-xml php-opcache php-soap php-xmlrpc php-common php-dev php-zip php-ssh2 php-mbstring php-ldap \
+ffmpeg"
 # ntp usb-modeswitch python-serial
-extra_pkg_dependencies="libav-tools|libavcodec-dev \
-libsox-fmt-mp3 sox libttspico-utils \
+extra_pkg_dependencies="libsox-fmt-mp3 sox libttspico-utils \
 espeak \
 mbrola \
 brltty \
