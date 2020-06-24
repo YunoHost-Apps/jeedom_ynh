@@ -26,9 +26,9 @@ $CONFIG = array(
 	'db' => array(
 		'host' => 'localhost',
 		'port' => '3306',
-		'dbname' => '#DBNAME#',
-		'username' => '#USERNAME#',
-		'password' => '#PASSWORD#',
+		'dbname' => '__DB_NAME__',
+		'username' => '__DB_USER__',
+		'password' => '__DB_PWD__',
 	),
 );
-?>
+ 
