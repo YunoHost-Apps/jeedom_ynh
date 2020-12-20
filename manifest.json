@@ -8,7 +8,7 @@
 	},
 	"version": "3.3.45~ynh2",
 	"url": "http://www.jeedom.fr/",
-	"license": "free",
+	"license": "GPL-2.0-only",
 	"maintainer": {
 		"name": "scith",
 		"url": "https://github.com/scith"

@@ -76,13 +76,6 @@ ynh_clean_setup () {
 ynh_abort_if_errors
 
 #=================================================
-# CHECK THE PATH
-#=================================================
-
-# Normalize the URL path syntax
-path_url=$(ynh_normalize_url_path --path_url=$path_url)
-
-#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -99,7 +92,7 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -122,7 +115,7 @@ ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading php-fpm configuration..."
+ynh_script_progression --message="Upgrading PHP-FPM configuration..."
 
 # Create a dedicated php-fpm config
 ynh_add_fpm_config
@@ -137,7 +130,7 @@ ynh_script_progression --message="Configuring rights..."
 
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 777 -R /tmp/jeedom
+chmod 775 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
@@ -186,7 +179,7 @@ chmod 775 -R $final_path
 chown -R www-data:www-data $final_path
 
 # Create tmp required by Jeedom
-chmod 777 -R /tmp/jeedom
+chmod 775 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 #=================================================
@@ -203,7 +196,7 @@ ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/core/api/jeeAp
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

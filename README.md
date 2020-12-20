@@ -1,7 +1,7 @@
 # Jeedom for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)  
-[![Install Jeedom with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=jeedom)
+[![Install Jeedom with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
 > *This package allows you to install Jeedom quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/install) to learn how to install it.*
@@ -35,8 +35,7 @@ Jeedom is an home automation software.
 
 ---
 
-Developer info
-----------------
+## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/jeedom_ynh/tree/testing).
 
