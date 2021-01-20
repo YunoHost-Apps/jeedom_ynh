@@ -165,11 +165,11 @@ ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chmod 775 -R $final_path
-chown -R www-data:www-data $final_path
+chown -R www-data: $final_path
 
 # Create tmp required by Jeedom
 chmod 775 -R /tmp/jeedom
-chown www-data:www-data -R /tmp/jeedom
+chown www-data: -R /tmp/jeedom
 
 #=================================================
 # SETUP SSOWAT

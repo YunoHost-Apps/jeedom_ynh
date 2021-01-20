@@ -6,7 +6,7 @@
 		"en": "Home automation application",
 		"fr": "Application de domotique"
 	},
-	"version": "3.3.45~ynh2",
+	"version": "4.1.17~ynh1",
 	"url": "http://www.jeedom.fr/",
 	"license": "GPL-2.0-only",
 	"maintainer": {
@@ -19,7 +19,7 @@
 	"multi_instance": false,
 	"services": [
         "nginx",
-        "php7.0-fpm",
+        "php7.3-fpm",
         "mysql"
     ],
 	"arguments": {
