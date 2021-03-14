@@ -175,12 +175,13 @@ chown www-data:www-data -R /tmp/jeedom
 # SETUP SSOWAT
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
+ynh_permission_update --permission="main" --add="visitors"
 
 # Remove the public access
-ynh_app_setting_delete --app=$app --key=skipped_uris
+
 
 # Access to API without SSO
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/core/api/jeeApi.php"
+
 
 #=================================================
 # RELOAD NGINX
