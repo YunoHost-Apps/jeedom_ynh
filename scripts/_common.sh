@@ -7,7 +7,7 @@
 # dependencies used by the app
 pkg_dependencies="ntp ca-certificates unzip curl cron \
 locate tar telnet wget logrotate fail2ban dos2unix ntpdate htop iotop vim iftop smbclient \
-git python python-pip \
+git \
 python3 python3-pip \
 software-properties-common \
 libexpat1 ssl-cert \
