@@ -51,29 +51,16 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..."
 
-# Fix is_public as a boolean value
-if [ "$sudo" = "Yes" ]; then
-	ynh_app_setting_set --app=$app --key=sudo --value=1
-	sudo=1
-	# Removes sudo to www-data
-	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-			sed -i "/www-data ALL=(ALL) NOPASSWD: ALL/d" /etc/sudoers
-	fi
-elif [ "$sudo" = "No" ]; then
-	ynh_app_setting_set --app=$app --key=sudo --value=0
-	sudo=0
+# Cleaning legacy permissions
+if ynh_legacy_permissions_exists; then
+	ynh_legacy_permissions_delete_all
+
+	ynh_app_setting_delete --app=$app --key=is_public
 fi
 
-# If db_name doesn't exist, create it
-if [ -z "$db_name" ]; then
-	db_name=$(ynh_sanitize_dbid --db_name=$app)
-	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-fi
-
-# If final_path doesn't exist, create it
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+# Create a permission if needed
+if ! ynh_permission_exists --permission="api"; then
+	ynh_permission_create --permission="api" --url="/core/api/jeeApi.php" --allowed="visitors" --show_tile="false" --protected="true"
 fi
 
 #=================================================
