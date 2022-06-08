@@ -32,6 +32,22 @@ ynh_script_progression --message="Checking version..."
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+
+# Backup the current version of the app
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+	# Restore it if the upgrade fails
+	ynh_restore_upgradebackup
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..."
@@ -62,28 +78,13 @@ if [ -z "$final_path" ]; then
 fi
 
 #=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+# CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	# restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
-#=================================================
-# CHECK THE PATH
-#=================================================
-
-# Normalize the URL path syntax
-path_url=$(ynh_normalize_url_path --path_url=$path_url)
-
-#=================================================
-# STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -96,13 +97,9 @@ then
 	ynh_setup_source --dest_dir="$final_path"
 fi
 
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..."
-
-# Create a dedicated nginx config
-ynh_add_nginx_config
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -110,23 +107,24 @@ ynh_add_nginx_config
 ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# UPGRADE EXTRA DEPENDENCIES
-#=================================================
-ynh_print_info --message="Upgrading extra dependencies ..."
-
-lsb_name="$(lsb_release --codename --short)"
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name contrib non-free" --package="$extra_pkg_dependencies"
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading php-fpm configuration..."
+ynh_script_progression --message="Upgrading PHP-FPM configuration..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -175,8 +173,6 @@ ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app
 #php $final_path/install/sick.php
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 ynh_script_progression --message="Securing files and directories..."
@@ -190,20 +186,11 @@ chmod 777 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 #=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
-
-# Remove the public access
-ynh_app_setting_delete --app=$app --key=skipped_uris
-
-# Access to API without SSO
-ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/core/api/jeeApi.php"
-
+# GENERIC FINALIZATION
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

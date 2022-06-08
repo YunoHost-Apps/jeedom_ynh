@@ -6,7 +6,7 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-#Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -23,7 +23,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -40,20 +40,11 @@ sudo=$(ynh_app_setting_get --app=$app --key=sudo)
 #=================================================
 ynh_script_progression --message="Validating restoration parameters..."
 
-ynh_webpath_available --domain=$domain --path_url=$path_url \
-	|| ynh_die --message="Path not available: ${domain}${path_url}"
 test ! -d $final_path \
 	|| ynh_die --message="There is already a directory: $final_path "
 
 #=================================================
 # STANDARD RESTORATION STEPS
-#=================================================
-# RESTORE THE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the nginx configuration..."
-
-ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
@@ -61,21 +52,9 @@ ynh_script_progression --message="Restoring the app main directory..."
 
 ynh_restore_file --origin_path="$final_path"
 
-#=================================================
-# RESTORE USER RIGHTS
-#=================================================
-ynh_script_progression --message="Restoring user rights..."
-
-# Restore permissions on app files
-chmod 775 -R $final_path
-chown -R www-data:www-data $final_path
-
-#=================================================
-# RESTORE THE PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring PHP-FPM configuration..."
-
-ynh_restore_file --origin_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # SPECIFIC RESTORATION
@@ -86,14 +65,21 @@ ynh_script_progression --message="Reinstalling dependencies..."
 
 # Define and install dependencies
 ynh_install_app_dependencies $pkg_dependencies
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
-# REINSTALL EXTRA DEPENDENCIES
+# RESTORE THE PHP-FPM CONFIGURATION
 #=================================================
-ynh_print_info --message="Reinstalling extra dependencies ..."
+ynh_script_progression --message="Restoring the PHP-FPM configuration..."
 
-lsb_name="$(lsb_release --codename --short)"
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name contrib non-free" --package="$extra_pkg_dependencies"
+ynh_restore_file --origin_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
+
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Restoring the NGINX web server configuration..."
+
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # CONFIGURING RIGHTS
@@ -134,9 +120,9 @@ ynh_mysql_setup_db --db_user=$db_user --db_name=$db_name --db_pwd=$db_pwd
 ynh_mysql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
 
 #=================================================
-# RESTORE THE CRON FILES
+# RESTORE VARIOUS FILES
 #=================================================
-ynh_script_progression --message="Restoring cron files..."
+ynh_script_progression --message="Restoring various files..."
 
 ynh_restore_file --origin_path="/etc/cron.d/${app}"
 ynh_restore_file --origin_path="/etc/cron.d/${app}_watchdog"
@@ -146,7 +132,7 @@ ynh_restore_file --origin_path="/etc/cron.d/${app}_watchdog"
 #=================================================
 # RELOAD NGINX AND PHP-FPM
 #=================================================
-ynh_script_progression --message="Reloading nginx web server and php-fpm..."
+ynh_script_progression --message="Reloading NGINX web server and PHP-FPM..."
 
 ynh_systemd_action --service_name=php$phpversion-fpm --action=reload
 ynh_systemd_action --service_name=nginx --action=reload

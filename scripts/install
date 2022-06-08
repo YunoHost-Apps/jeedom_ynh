@@ -53,19 +53,22 @@ ynh_app_setting_set --app=$app --key=admin --value=$admin
 ynh_app_setting_set --app=$app --key=sudo --value=$sudo
 
 #=================================================
+# STANDARD MODIFICATIONS
+#=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
-# INSTALL EXTRA DEPENDENCIES
+# CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Installing extra dependencies ..."
+ynh_script_progression --message="Configuring system user..."
 
-lsb_name="$(lsb_release --codename --short)"
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name contrib non-free" --package="$extra_pkg_dependencies"
+# Create a system user
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -86,20 +89,24 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
 
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring NGINX web server..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring php-fpm..."
+ynh_script_progression --message="Configuring PHP-FPM..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
@@ -157,8 +164,6 @@ ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app
 #sudo php $final_path/install/sick.php
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 ynh_script_progression --message="Securing files and directories..."
@@ -172,9 +177,11 @@ chmod 777 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 #=================================================
+# GENERIC FINALIZATION
+#=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring permissions..."
 
 # Remove the public access
 ynh_app_setting_delete --app=$app --key=skipped_uris
@@ -185,7 +192,7 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/core/api/jeeApi.
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

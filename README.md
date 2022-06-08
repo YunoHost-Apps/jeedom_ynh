@@ -9,7 +9,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 ## Overview
 Jeedom is an home automation software.
 
-**Shipped version:** 3.3.45
+**Shipped version:** 4.1.19
 
 ## Screenshots
 

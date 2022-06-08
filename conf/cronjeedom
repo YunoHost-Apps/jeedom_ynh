@@ -1,1 +1,1 @@
-* * * * * www-data /usr/bin/php__PHPVERSION__ -f __FINALPATH__/core/php/jeeCron.php"
+* * * * * root /usr/bin/php__PHPVERSION__ -f __FINALPATH__/core/php/jeeCron.php"
