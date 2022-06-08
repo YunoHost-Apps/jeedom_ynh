@@ -7,7 +7,6 @@
 #=================================================
 
 source _common.sh
-source ynh_add_config
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -142,12 +141,23 @@ if [ $sudo ]; then
 fi
 
 #=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding a configuration file..."
+
+ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
+
+chmod 400 "$final_path/core/config/common.config.php"
+chown $app:$app "$final_path/core/config/common.config.php"
+
+# Cron
+ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
+ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
+
+#=================================================
 # INSTALL JEEDOM
 #=================================================
 ynh_script_progression --message="Installing Jeedom..."
-
-# Configure Jeedom database
-ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
 
 # Install Jeedom
 php$phpversion $final_path/install/install.php mode=force
@@ -155,10 +165,6 @@ php$phpversion $final_path/install/install.php mode=force
 # Configure LDAP and the Admin User and access settings
 ynh_replace_string --match_string="__ADMIN__" --replace_string="$admin" --target_file="../conf/config.sql"
 ynh_mysql_execute_file_as_root --file="../conf/config.sql" --database=$db_name
-
-# Cron
-ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
-ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
 
 # Check
 #sudo php $final_path/install/sick.php
@@ -183,11 +189,10 @@ chown www-data:www-data -R /tmp/jeedom
 #=================================================
 ynh_script_progression --message="Configuring permissions..."
 
-# Remove the public access
-ynh_app_setting_delete --app=$app --key=skipped_uris
-
-# Access to API without SSO
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/core/api/jeeApi.php"
+# Everyone can access the API part
+# We don't want to display the tile in the SSO so we put --show_tile="false"
+# And we don't want the YunoHost admin to be able to remove visitors group to this permission, so we put --protected="true"
+ynh_permission_create --permission="api" --url="/core/api/jeeApi.php" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
 # RELOAD NGINX

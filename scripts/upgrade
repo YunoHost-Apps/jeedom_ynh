@@ -7,7 +7,6 @@
 #=================================================
 
 source _common.sh
-source ynh_add_config
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -94,7 +93,7 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$final_path" --keep="/core/config/common.config.php"
 fi
 
 chmod 750 "$final_path"
@@ -156,6 +155,20 @@ if [ $sudo ]; then
 		bash -c 'echo "www-data ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
 	fi
 fi
+
+#=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Updating a configuration file..."
+
+ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
+
+chmod 400 "$final_path/core/config/common.config.php"
+chown $app:$app "$final_path/core/config/common.config.php"
+
+# Cron
+ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
+ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
 
 #=================================================
 # UPGRADE JEEDOM
