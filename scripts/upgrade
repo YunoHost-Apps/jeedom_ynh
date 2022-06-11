@@ -21,6 +21,8 @@ path_url=$(ynh_app_setting_get --app=$app --key=path)
 admin=$(ynh_app_setting_get --app=$app --key=admin)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_user=$db_name
+db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 sudo=$(ynh_app_setting_get --app=$app --key=sudo)
 
 #=================================================
@@ -121,7 +123,7 @@ ynh_script_progression --message="Configuring rights..."
 
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 777 -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
@@ -178,11 +180,11 @@ ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chmod 775 -R $final_path
+chmod 750 -R $final_path
 chown -R www-data:www-data $final_path
 
 # Create tmp required by Jeedom
-chmod 777 -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 #=================================================

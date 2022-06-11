@@ -93,14 +93,6 @@ chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
 #=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring NGINX web server..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
 ynh_script_progression --message="Configuring PHP-FPM..."
@@ -108,6 +100,14 @@ ynh_script_progression --message="Configuring PHP-FPM..."
 # Create a dedicated PHP-FPM config
 ynh_add_fpm_config
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Configuring NGINX web server..."
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC SETUP
@@ -118,7 +118,7 @@ ynh_script_progression --message="Configuring rights..."
 
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 777 -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
@@ -175,11 +175,11 @@ ynh_mysql_execute_file_as_root --file="../conf/config.sql" --database=$db_name
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chmod 775 -R $final_path
+chmod 750 -R $final_path
 chown -R www-data:www-data $final_path
 
 # Create tmp required by Jeedom
-chmod 777 -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
 chown www-data:www-data -R /tmp/jeedom
 
 #=================================================
