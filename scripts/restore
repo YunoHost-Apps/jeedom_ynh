@@ -97,7 +97,7 @@ ynh_script_progression --message="Configuring rights..."
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
 chmod 750 -R /tmp/jeedom
-chown www-data:www-data -R /tmp/jeedom
+chown $app:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
 if [ $(getent group dialout) ]; then
