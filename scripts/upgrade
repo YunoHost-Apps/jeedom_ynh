@@ -7,7 +7,6 @@
 #=================================================
 
 source _common.sh
-source ynh_add_config
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -22,6 +21,8 @@ path_url=$(ynh_app_setting_get --app=$app --key=path)
 admin=$(ynh_app_setting_get --app=$app --key=admin)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_user=$db_name
+db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
 sudo=$(ynh_app_setting_get --app=$app --key=sudo)
 
 #=================================================
@@ -32,36 +33,6 @@ ynh_script_progression --message="Checking version..."
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
-
-# Fix is_public as a boolean value
-if [ "$sudo" = "Yes" ]; then
-	ynh_app_setting_set --app=$app --key=sudo --value=1
-	sudo=1
-	# Removes sudo to www-data
-	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-			sed -i "/www-data ALL=(ALL) NOPASSWD: ALL/d" /etc/sudoers
-	fi
-elif [ "$sudo" = "No" ]; then
-	ynh_app_setting_set --app=$app --key=sudo --value=0
-	sudo=0
-fi
-
-# If db_name doesn't exist, create it
-if [ -z "$db_name" ]; then
-	db_name=$(ynh_sanitize_dbid --db_name=$app)
-	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-fi
-
-# If final_path doesn't exist, create it
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-fi
-
-#=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
 ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
@@ -69,21 +40,39 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	# restore it if the upgrade fails
+	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
 #=================================================
-# CHECK THE PATH
-#=================================================
-
-# Normalize the URL path syntax
-path_url=$(ynh_normalize_url_path --path_url=$path_url)
-
-#=================================================
 # STANDARD UPGRADE STEPS
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression --message="Ensuring downward compatibility..."
+
+# Cleaning legacy permissions
+if ynh_legacy_permissions_exists; then
+	ynh_legacy_permissions_delete_all
+
+	ynh_app_setting_delete --app=$app --key=is_public
+fi
+
+# Create a permission if needed
+if ! ynh_permission_exists --permission="api"; then
+	ynh_permission_create --permission="api" --url="/core/api/jeeApi.php" --allowed="visitors" --show_tile="false" --protected="true"
+fi
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..."
+
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir="$final_path"
+
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -93,16 +82,12 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$final_path" --keep="/core/config/common.config.php"
 fi
 
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..."
-
-# Create a dedicated nginx config
-ynh_add_nginx_config
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -110,23 +95,24 @@ ynh_add_nginx_config
 ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# UPGRADE EXTRA DEPENDENCIES
-#=================================================
-ynh_print_info --message="Upgrading extra dependencies ..."
-
-lsb_name="$(lsb_release --codename --short)"
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name contrib non-free" --package="$extra_pkg_dependencies"
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading php-fpm configuration..."
+ynh_script_progression --message="Upgrading PHP-FPM configuration..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -137,8 +123,8 @@ ynh_script_progression --message="Configuring rights..."
 
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 777 -R /tmp/jeedom
-chown www-data:www-data -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
+chown $app:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
 if [ $(getent group dialout) ]; then
@@ -160,6 +146,20 @@ if [ $sudo ]; then
 fi
 
 #=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Updating a configuration file..."
+
+ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
+
+chmod 400 "$final_path/core/config/common.config.php"
+chown $app:$app "$final_path/core/config/common.config.php"
+
+# Cron
+ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
+ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
+
+#=================================================
 # UPGRADE JEEDOM
 #=================================================
 ynh_script_progression --message="Upgrading Jeedom..."
@@ -175,35 +175,24 @@ ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app
 #php $final_path/install/sick.php
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chmod 775 -R $final_path
-chown -R www-data:www-data $final_path
+chmod 750 -R $final_path
+chown -R $app:www-data $final_path
 
 # Create tmp required by Jeedom
-chmod 777 -R /tmp/jeedom
-chown www-data:www-data -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
+chown $app:www-data -R /tmp/jeedom
 
 #=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
-
-# Remove the public access
-ynh_app_setting_delete --app=$app --key=skipped_uris
-
-# Access to API without SSO
-ynh_app_setting_set --app="$app" --key=unprotected_uris --value="/core/api/jeeApi.php"
-
+# GENERIC FINALIZATION
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
