@@ -7,7 +7,6 @@
 #=================================================
 
 source _common.sh
-source ynh_add_config
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -53,19 +52,22 @@ ynh_app_setting_set --app=$app --key=admin --value=$admin
 ynh_app_setting_set --app=$app --key=sudo --value=$sudo
 
 #=================================================
+# STANDARD MODIFICATIONS
+#=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies"
 
 #=================================================
-# INSTALL EXTRA DEPENDENCIES
+# CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Installing extra dependencies ..."
+ynh_script_progression --message="Configuring system user..."
 
-lsb_name="$(lsb_release --codename --short)"
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $lsb_name contrib non-free" --package="$extra_pkg_dependencies"
+# Create a system user
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # CREATE A MYSQL DATABASE
@@ -86,22 +88,26 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
 
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring nginx web server..."
-
-# Create a dedicated nginx config
-ynh_add_nginx_config
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring php-fpm..."
+ynh_script_progression --message="Configuring PHP-FPM..."
 
-# Create a dedicated php-fpm config
+# Create a dedicated PHP-FPM config
 ynh_add_fpm_config
 phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Configuring NGINX web server..."
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC SETUP
@@ -112,8 +118,8 @@ ynh_script_progression --message="Configuring rights..."
 
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 777 -R /tmp/jeedom
-chown www-data:www-data -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
+chown $app:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
 if [ $(getent group dialout) ]; then
@@ -135,12 +141,23 @@ if [ $sudo ]; then
 fi
 
 #=================================================
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding a configuration file..."
+
+ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
+
+chmod 400 "$final_path/core/config/common.config.php"
+chown $app:$app "$final_path/core/config/common.config.php"
+
+# Cron
+ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
+ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
+
+#=================================================
 # INSTALL JEEDOM
 #=================================================
 ynh_script_progression --message="Installing Jeedom..."
-
-# Configure Jeedom database
-ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
 
 # Install Jeedom
 php$phpversion $final_path/install/install.php mode=force
@@ -149,43 +166,38 @@ php$phpversion $final_path/install/install.php mode=force
 ynh_replace_string --match_string="__ADMIN__" --replace_string="$admin" --target_file="../conf/config.sql"
 ynh_mysql_execute_file_as_root --file="../conf/config.sql" --database=$db_name
 
-# Cron
-ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
-ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
-
 # Check
 #sudo php $final_path/install/sick.php
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
-chmod 775 -R $final_path
-chown -R www-data:www-data $final_path
+chmod 750 -R $final_path
+chown -R $app:www-data $final_path
 
 # Create tmp required by Jeedom
-chmod 777 -R /tmp/jeedom
-chown www-data:www-data -R /tmp/jeedom
+chmod 750 -R /tmp/jeedom
+chown $app:www-data -R /tmp/jeedom
 
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring permissions..."
 
-# Remove the public access
-ynh_app_setting_delete --app=$app --key=skipped_uris
-
-# Access to API without SSO
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/core/api/jeeApi.php"
+# Everyone can access the API part
+# We don't want to display the tile in the SSO so we put --show_tile="false"
+# And we don't want the YunoHost admin to be able to remove visitors group to this permission, so we put --protected="true"
+ynh_permission_create --permission="api" --url="/core/api/jeeApi.php" --allowed="visitors" --show_tile="false" --protected="true"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

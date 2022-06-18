@@ -15,8 +15,9 @@ apt-transport-https \
 xvfb cutycapt xauth \
 duplicity \
 at \
-php-curl php-gd php-imap php-xml php-soap php-xmlrpc php-common php-dev php-zip php-ssh2 php-mbstring php-ldap \
+php$YNH_DEFAULT_PHP_VERSION-curl php$YNH_DEFAULT_PHP_VERSION-gd php$YNH_DEFAULT_PHP_VERSION-imap php$YNH_DEFAULT_PHP_VERSION-xml php$YNH_DEFAULT_PHP_VERSION-soap php$YNH_DEFAULT_PHP_VERSION-xmlrpc php$YNH_DEFAULT_PHP_VERSION-common php$YNH_DEFAULT_PHP_VERSION-dev php$YNH_DEFAULT_PHP_VERSION-zip php$YNH_DEFAULT_PHP_VERSION-ssh2 php$YNH_DEFAULT_PHP_VERSION-mbstring php$YNH_DEFAULT_PHP_VERSION-ldap \
 ffmpeg"
+
 # ntp usb-modeswitch python-serial
 extra_pkg_dependencies="libsox-fmt-mp3 sox libttspico-utils \
 espeak \
