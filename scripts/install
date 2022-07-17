@@ -49,7 +49,7 @@ ynh_script_progression --message="Storing installation settings..."
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
 ynh_app_setting_set --app=$app --key=admin --value=$admin
-ynh_app_setting_set --app=$app --key=sudo --value=$sudo
+ynh_app_setting_set --app=$app --key="sudo" --value=$sudo
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -59,7 +59,7 @@ ynh_app_setting_set --app=$app --key=sudo --value=$sudo
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies"
+ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies" --key="https://ftp-master.debian.org/keys/release-$(lsb_release --release --short).asc"
 
 #=================================================
 # CREATE DEDICATED USER
@@ -133,8 +133,8 @@ if [ $(getent group tty) ]; then
 fi
 
 # Sudo permissions to the user if agreed to
-if [ $sudo ]; then
-	usermod -a -G sudo www-data
+if [ ${sudo} ]; then
+	usermod -a -G "sudo" www-data
 	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
 		bash -c 'echo "www-data ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
 	fi
@@ -165,9 +165,6 @@ php$phpversion $final_path/install/install.php mode=force
 # Configure LDAP and the Admin User and access settings
 ynh_replace_string --match_string="__ADMIN__" --replace_string="$admin" --target_file="../conf/config.sql"
 ynh_mysql_execute_file_as_root --file="../conf/config.sql" --database=$db_name
-
-# Check
-#sudo php $final_path/install/sick.php
 
 #=================================================
 # SECURE FILES AND DIRECTORIES
