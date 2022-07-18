@@ -6,7 +6,7 @@
         "en": "Home automation application",
         "fr": "Application de domotique"
     },
-    "version": "4.1.19~ynh1",
+    "version": "4.1.19~ynh2",
     "url": "https://www.jeedom.com",
     "upstream": {
         "license": "GPL-2.0-or-later",
@@ -16,8 +16,7 @@
     },
     "license": "GPL-2.0-or-later",
     "maintainer": {
-        "name": "scith",
-        "url": "https://github.com/scith"
+        "name": ""
     },
     "requirements": {
         "yunohost": ">= 4.3.0"

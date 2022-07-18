@@ -18,7 +18,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 Jeedom is an home automation software.
 
 
-**Version incluse :** 4.1.19~ynh1
+**Version incluse :** 4.1.19~ynh2
 
 ## Captures d'écran
 
