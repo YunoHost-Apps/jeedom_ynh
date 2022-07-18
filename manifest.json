@@ -16,8 +16,7 @@
     },
     "license": "GPL-2.0-or-later",
     "maintainer": {
-        "name": "scith",
-        "url": "https://github.com/scith"
+        "name": ""
     },
     "requirements": {
         "yunohost": ">= 4.3.0"
