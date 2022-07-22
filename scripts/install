@@ -123,18 +123,18 @@ chown $app:www-data -R /tmp/jeedom
 
 # For nginx user to be able to communicate with home automation devices
 if [ $(getent group dialout) ]; then
-	usermod -a -G dialout www-data
+	usermod -a -G dialout $app
 fi
 if [ $(getent group gpio) ]; then
-	usermod -a -G gpio www-data
+	usermod -a -G gpio $app
 fi
 if [ $(getent group tty) ]; then
-	usermod -a -G tty www-data
+	usermod -a -G tty $app
 fi
 
 # Sudo permissions to the user if agreed to
 if [ ${sudo} ]; then
-	usermod -a -G "sudo" www-data
+	usermod -a -G "sudo" $app
 	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
 		bash -c 'echo "www-data ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
 	fi
