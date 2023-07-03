@@ -5,24 +5,25 @@ It shall NOT be edited by hand.
 
 # Jeedom pour YunoHost
 
-[![Niveau d'intégration](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)  
+[![Niveau d’intégration](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+
 [![Installer Jeedom avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
 *[Read this readme in english.](./README.md)*
 
-> *Ce package vous permet d'installer Jeedom rapidement et simplement sur un serveur YunoHost.
-Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
+> *Ce package vous permet d’installer Jeedom rapidement et simplement sur un serveur YunoHost.
+Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l’installer et en profiter.*
 
-## Vue d'ensemble
+## Vue d’ensemble
 
 Jeedom is an home automation software.
 
 
-**Version incluse :** 4.1.19~ynh3
+**Version incluse :** 4.1.19~ynh4
 
-## Captures d'écran
+## Captures d’écran
 
-![Capture d'écran de Jeedom](./doc/screenshots/01-Appli-jeedom.png)
+![Capture d’écran de Jeedom](./doc/screenshots/01-Appli-jeedom.png)
 
 ## Avertissements / informations importantes
 
@@ -32,9 +33,9 @@ Jeedom is an home automation software.
 
 ## Documentations et ressources
 
-* Site officiel de l'app : <https://www.jeedom.com>
-* Documentation officielle de l'admin : <https://doc.jeedom.com>
-* Dépôt de code officiel de l'app : <https://github.com/jeedom/core>
+* Site officiel de l’app : <https://www.jeedom.com>
+* Documentation officielle de l’admin : <https://doc.jeedom.com>
+* Dépôt de code officiel de l’app : <https://github.com/jeedom/core>
 * Documentation YunoHost pour cette app : <https://yunohost.org/app_jeedom>
 * Signaler un bug : <https://github.com/YunoHost-Apps/jeedom_ynh/issues>
 
@@ -50,4 +51,4 @@ ou
 sudo yunohost app upgrade jeedom -u https://github.com/YunoHost-Apps/jeedom_ynh/tree/testing --debug
 ```
 
-**Plus d'infos sur le packaging d'applications :** <https://yunohost.org/packaging_apps>
+**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
