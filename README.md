@@ -36,7 +36,7 @@ Jeedom is an home automation software.
 * Official app website: <https://www.jeedom.com>
 * Official admin documentation: <https://doc.jeedom.com>
 * Upstream app code repository: <https://github.com/jeedom/core>
-* YunoHost documentation for this app: <https://yunohost.org/app_jeedom>
+* YunoHost Store: <https://apps.yunohost.org/app/jeedom>
 * Report a bug: <https://github.com/YunoHost-Apps/jeedom_ynh/issues>
 
 ## Developer info
