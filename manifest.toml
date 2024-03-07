@@ -77,6 +77,8 @@ ram.runtime = "50M" # FIXME: replace with an **estimate** minimum ram requiremen
         "php7.4-ssh2",
         "php7.4-mbstring",
         "php7.4-ldap",
+
+        "mariadb-server",
     ]
 
     [resources.apt.extras.nonfree]
