@@ -1,0 +1,4 @@
+{
+    "bashIde.globPattern": "**/*@(.sh|.inc|.bash|.command)|scripts/*|.vscode/helpers/*",
+    "bashIde.includeAllWorkspaceSymbols": true
+}

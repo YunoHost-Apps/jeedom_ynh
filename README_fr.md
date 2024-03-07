@@ -19,17 +19,11 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 Jeedom is an home automation software.
 
 
-**Version incluse :** 4.1.19~ynh4
+**Version incluse :** 4.1.19~ynh5
 
 ## Captures d’écran
 
 ![Capture d’écran de Jeedom](./doc/screenshots/01-Appli-jeedom.png)
-
-## Avertissements / informations importantes
-
-#### Multi-user support
-
-- LDAP login: your YunoHost users also become Jeedom users
 
 ## Documentations et ressources
 
