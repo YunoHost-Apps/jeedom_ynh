@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,155 +8,49 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
+# INITIALIZE AND STORE SETTINGS
 #=================================================
 
-ynh_clean_setup () {
-	true
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
-#=================================================
-
-domain=$YNH_APP_ARG_DOMAIN
-path_url=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
-sudo=$YNH_APP_ARG_SUDO
-
-app=$YNH_APP_INSTANCE_NAME
 fpm_footprint="low"
 fpm_free_footprint=0
 fpm_usage="low"
 
-#=================================================
-# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
-#=================================================
-ynh_script_progression --message="Validating installation parameters..."
-
-final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
-
-# Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+ynh_app_setting_set --app="$app" --key="fpm_footprint" --value="$fpm_footprint"
+ynh_app_setting_set --app="$app" --key="fpm_free_footprint" --value="$fpm_free_footprint"
+ynh_app_setting_set --app="$app" --key="fpm_usage" --value="$fpm_usage"
 
 #=================================================
-# STORE SETTINGS FROM MANIFEST
+# CONFIGURING RIGHTS
 #=================================================
-ynh_script_progression --message="Storing installation settings..."
+ynh_script_progression --message="Configuring permissions..."
 
-ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
-ynh_app_setting_set --app=$app --key=admin --value=$admin
-ynh_app_setting_set --app=$app --key="sudo" --value=$sudo
-ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
-ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
-ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
-
-#=================================================
-# STANDARD MODIFICATIONS
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Installing dependencies..."
-
-ynh_install_app_dependencies $pkg_dependencies
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies" --key="https://ftp-master.debian.org/keys/release-$(lsb_release --release --short).asc"
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Configuring system user..."
-
-# Create a system user
-ynh_system_user_create --username=$app --home_dir="$final_path"
-
-#=================================================
-# CREATE A MYSQL DATABASE
-#=================================================
-ynh_script_progression --message="Creating a MySQL database..."
-
-db_name=$(ynh_sanitize_dbid --db_name=$app)
-db_user=$db_name
-ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-ynh_mysql_setup_db --db_user=$db_user --db_name=$db_name
+_jeedom_set_permission
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..."
 
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path"
+ynh_setup_source --dest_dir="$install_dir"
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod -R o-rwx "$install_dir"
+chown -R "$app:www-data" "$install_dir"
 
-#=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring PHP-FPM..."
-
-# Create a dedicated PHP-FPM config
-ynh_add_fpm_config --usage=$fpm_usage --footprint=$fpm_footprint
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring NGINX web server..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
-# SPECIFIC SETUP
-#=================================================
-# CONFIGURING RIGHTS
-#=================================================
-ynh_script_progression --message="Configuring rights..."
-
+# FIXME: is it used?? It's not even reboot persistent…
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 750 -R /tmp/jeedom
-chown $app:www-data -R /tmp/jeedom
-
-# For nginx user to be able to communicate with home automation devices
-if [ $(getent group dialout) ]; then
-	usermod -a -G dialout $app
-fi
-if [ $(getent group gpio) ]; then
-	usermod -a -G gpio $app
-fi
-if [ $(getent group tty) ]; then
-	usermod -a -G tty $app
-fi
-
-# Sudo permissions to the user if agreed to
-if [ ${sudo} ]; then
-	usermod -a -G "sudo" $app
-	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-		bash -c 'echo "www-data ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
-	fi
-fi
+chmod 750 /tmp/jeedom
+chown "$app:www-data" -R /tmp/jeedom
 
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding a configuration file..."
+ynh_script_progression --message="Adding $app's configuration files..." --weight=1
 
-ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
-
-chmod 400 "$final_path/core/config/common.config.php"
-chown $app:$app "$final_path/core/config/common.config.php"
-
-# Cron
-ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
-ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
+ynh_add_config --template="common.config.php" --destination="$install_dir/core/config/common.config.php"
+chmod 400 "$install_dir/core/config/common.config.php"
+chown "$app:$app" "$install_dir/core/config/common.config.php"
 
 #=================================================
 # INSTALL JEEDOM
@@ -166,43 +58,27 @@ ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app
 ynh_script_progression --message="Installing Jeedom..."
 
 # Install Jeedom
-php$phpversion $final_path/install/install.php mode=force
+"php$phpversion" "$install_dir/install/install.php" mode=force
 
 # Configure LDAP and the Admin User and access settings
-ynh_replace_string --match_string="__ADMIN__" --replace_string="$admin" --target_file="../conf/config.sql"
-ynh_mysql_execute_file_as_root --file="../conf/config.sql" --database=$db_name
+ynh_add_config --template="config.sql" --destination="$install_dir/config.sql"
+ynh_mysql_execute_file_as_root --file="$install_dir/config.sql" --database="$db_name"
+ynh_secure_remove --file="$install_dir/config.sql"
 
 #=================================================
-# SECURE FILES AND DIRECTORIES
+# SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Securing files and directories..."
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
 
-# Set permissions to app files
-chmod 750 -R $final_path
-chown -R $app:www-data $final_path
+# Create a dedicated PHP-FPM config
+ynh_add_fpm_config --usage="$fpm_usage" --footprint="$fpm_footprint"
 
-# Create tmp required by Jeedom
-chmod 750 -R /tmp/jeedom
-chown $app:www-data -R /tmp/jeedom
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Configuring permissions..."
-
-# Everyone can access the API part
-# We don't want to display the tile in the SSO so we put --show_tile="false"
-# And we don't want the YunoHost admin to be able to remove visitors group to this permission, so we put --protected="true"
-ynh_permission_create --permission="api" --url="/core/api/jeeApi.php" --allowed="visitors" --show_tile="false" --protected="true"
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
-
-ynh_systemd_action --service_name=nginx --action=reload
+# Cron
+ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
+ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
 
 #=================================================
 # END OF SCRIPT
