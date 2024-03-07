@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -10,214 +8,85 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading installation settings..."
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=mysqlpwd)
-sudo=$(ynh_app_setting_get --app=$app --key=sudo)
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-
-fpm_footprint=$(ynh_app_setting_get --app=$app --key=fpm_footprint)
-fpm_free_footprint=$(ynh_app_setting_get --app=$app --key=fpm_free_footprint)
-fpm_usage=$(ynh_app_setting_get --app=$app --key=fpm_usage)
-
-#=================================================
-# CHECK VERSION
-#=================================================
-ynh_script_progression --message="Checking version..."
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
-
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..."
 
 # If fpm_footprint doesn't exist, create it
-if [ -z "$fpm_footprint" ]; then
+if [ -z "${fpm_footprint:-}" ]; then
     fpm_footprint=low
-    ynh_app_setting_set --app=$app --key=fpm_footprint --value=$fpm_footprint
+    ynh_app_setting_set --app="$app" --key="fpm_footprint" --value="$fpm_footprint"
 fi
 
 # If fpm_free_footprint doesn't exist, create it
-if [ -z "$fpm_free_footprint" ]; then
+if [ -z "${fpm_free_footprint:-}" ]; then
     fpm_free_footprint=0
-    ynh_app_setting_set --app=$app --key=fpm_free_footprint --value=$fpm_free_footprint
+    ynh_app_setting_set --app="$app" --key="fpm_free_footprint" --value="$fpm_free_footprint"
 fi
 
 # If fpm_usage doesn't exist, create it
-if [ -z "$fpm_usage" ]; then
+if [ -z "${fpm_usage:-}" ]; then
     fpm_usage=low
-    ynh_app_setting_set --app=$app --key=fpm_usage --value=$fpm_usage
-fi
-
-# Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
-
-	ynh_app_setting_delete --app=$app --key=is_public
-fi
-
-# Create a permission if needed
-if ! ynh_permission_exists --permission="api"; then
-	ynh_permission_create --permission="api" --url="/core/api/jeeApi.php" --allowed="visitors" --show_tile="false" --protected="true"
+    ynh_app_setting_set --app="$app" --key="fpm_usage" --value="$fpm_usage"
 fi
 
 #=================================================
-# CREATE DEDICATED USER
+# CONFIGURING RIGHTS
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Configuring permissions..."
 
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+_jeedom_set_permission
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression --message="Upgrading source files..."
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_script_progression --message="Upgrading source files..."
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$install_dir" --full_replace=1 --keep="/core/config/common.config.php"
 
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path" --keep="/core/config/common.config.php"
-fi
-
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..."
-
-ynh_install_app_dependencies $pkg_dependencies
-ynh_install_extra_app_dependencies --repo="deb http://deb.debian.org/debian $(lsb_release --codename --short) contrib non-free" --package="$extra_pkg_dependencies" --key="https://ftp-master.debian.org/keys/release-$(lsb_release --release --short).asc"
-
-#=================================================
-# PHP-FPM CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading PHP-FPM configuration..."
-
-# Create a dedicated PHP-FPM config
-ynh_add_fpm_config --phpversion=$phpversion --usage=$fpm_usage --footprint=$fpm_footprint
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
-# SPECIFIC UPGRADE
-#=================================================
-# CONFIGURING RIGHTS
-#=================================================
-ynh_script_progression --message="Configuring rights..."
+chmod -R o-rwx "$install_dir"
+chown -R "$app:www-data" "$install_dir"
 
 # Create tmp required by Jeedom
 mkdir -p /tmp/jeedom
-chmod 750 -R /tmp/jeedom
-chown $app:www-data -R /tmp/jeedom
-
-# For nginx user to be able to communicate with home automation devices
-if [ $(getent group dialout) ]; then
-	usermod -a -G dialout $app
-fi
-if [ $(getent group gpio) ]; then
-	usermod -a -G gpio $app
-fi
-if [ $(getent group tty) ]; then
-	usermod -a -G tty $app
-fi
-
-# Sudo permissions to the user if agreed to
-if [ ${sudo} ]; then
-	usermod -a -G "sudo" $app
-	if [ $(grep "www-data ALL=(ALL) NOPASSWD: ALL" /etc/sudoers | wc -l) -eq 0 ];then
-		bash -c 'echo "www-data ALL=(ALL) NOPASSWD: ALL" | (EDITOR="tee -a" visudo)'
-	fi
-fi
+chmod 750 /tmp/jeedom
+chown "$app:www-data" -R /tmp/jeedom
 
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating a configuration file..."
+ynh_script_progression --message="Updating $app's configuration files..."
 
-ynh_add_config --template="common.config.php" --destination="$final_path/core/config/common.config.php"
-
-chmod 400 "$final_path/core/config/common.config.php"
-chown $app:$app "$final_path/core/config/common.config.php"
-
-# Cron
-ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
-ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
+ynh_add_config --template="common.config.php" --destination="$install_dir/core/config/common.config.php"
+chmod 400 "$install_dir/core/config/common.config.php"
+chown "$app:$app" "$install_dir/core/config/common.config.php"
 
 #=================================================
 # UPGRADE JEEDOM
 #=================================================
 ynh_script_progression --message="Upgrading Jeedom..."
 
-# Upgrade Jeedom	
-php$phpversion $final_path/install/install.php mode=force
+# Upgrade Jeedom
+"php$phpversion" "$install_dir/install/install.php" mode=force
+
+# Check
+# "php$phpversion" "$install_dir/install/sick.php"
+
+#=================================================
+# REAPPLY SYSTEM CONFIGURATIONS
+#=================================================
+ynh_script_progression --message="Upgrading system configurations related to $app..." --weight=1
+
+# Create a dedicated PHP-FPM config
+ynh_add_fpm_config --usage="$fpm_usage" --footprint="$fpm_footprint"
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 # Cron
 ynh_add_config --template="cronjeedom" --destination="/etc/cron.d/${app}"
 ynh_add_config --template="cronjeedom_watchdog" --destination="/etc/cron.d/${app}_watchdog"
-
-# Check
-#php $final_path/install/sick.php
-
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-ynh_script_progression --message="Securing files and directories..."
-
-# Set permissions to app files
-chmod 750 -R $final_path
-chown -R $app:www-data $final_path
-
-# Create tmp required by Jeedom
-chmod 750 -R /tmp/jeedom
-chown $app:www-data -R /tmp/jeedom
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
-
-ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
