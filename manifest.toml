@@ -54,6 +54,7 @@ ram.runtime = "50M" # FIXME: replace with an **estimate** minimum ram requiremen
     url = "https://github.com/jeedom/core/archive/refs/tags/4.1.19.tar.gz"
     sha256 = "be50f67286d1533c93584f3653d4669b36d649033ad1750342b704f9a824476a"
 
+    autoupdate.strategy = "latest_github_tag"
 
     [resources.system_user]
 
