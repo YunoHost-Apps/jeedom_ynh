@@ -82,6 +82,7 @@ ram.runtime = "200M"
         "php7.4-ssh2",
         "php7.4-mbstring",
         "php7.4-ldap",
+        "php7.4-mysql",
 
         "mariadb-server",
     ]
