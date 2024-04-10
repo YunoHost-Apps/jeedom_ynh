@@ -65,10 +65,8 @@ ram.runtime = "200M"
 
     [resources.apt]
     packages = [
-        "ntp", "ca-certificates", "unzip", "curl", "cron", "locate", "tar",
-        "telnet", "wget", "logrotate", "fail2ban", "dos2unix", "ntpdate", "htop",
-        "iotop", "vim", "iftop", "smbclient", "git", "python3", "python3-pip",
-        "software-properties-common", "libexpat1", "ssl-cert", "apt-transport-https",
+        "unzip", "cron", "locate", "tar",
+        "logrotate", "dos2unix", "python3", "python3-pip", "libexpat1",
         "xvfb", "cutycapt", "xauth", "duplicity", "at", "ffmpeg",
 
         "php7.4-curl",
