@@ -9,7 +9,7 @@ It shall NOT be edited by hand.
 
 [![Install Jeedom with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
-*[Read this README is other languages.](./ALL_README.md)*
+*[Read this README in other languages.](./ALL_README.md)*
 
 > *This package allows you to install Jeedom quickly and simply on a YunoHost server.*  
 > *If you don't have YunoHost, please consult [the guide](https://yunohost.org/install) to learn how to install it.*
@@ -19,17 +19,11 @@ It shall NOT be edited by hand.
 Jeedom is an home automation software.
 
 
-**Shipped version:** 4.1.19~ynh4
+**Shipped version:** 4.1.19~ynh5
 
 ## Screenshots
 
 ![Screenshot of Jeedom](./doc/screenshots/01-Appli-jeedom.png)
-
-## Disclaimers / important information
-
-#### Multi-user support
-
-- LDAP login: your YunoHost users also become Jeedom users
 
 ## Documentation and resources
 

@@ -19,17 +19,11 @@ NON debe editarse manualmente.
 Jeedom is an home automation software.
 
 
-**Versión proporcionada:** 4.1.19~ynh4
+**Versión proporcionada:** 4.1.19~ynh5
 
 ## Capturas de pantalla
 
 ![Captura de pantalla de Jeedom](./doc/screenshots/01-Appli-jeedom.png)
-
-## Avisos / información importante
-
-#### Multi-user support
-
-- LDAP login: your YunoHost users also become Jeedom users
 
 ## Documentación e recursos
 
