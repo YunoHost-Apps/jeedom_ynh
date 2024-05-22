@@ -19,7 +19,7 @@ It shall NOT be edited by hand.
 Jeedom is an home automation software.
 
 
-**Shipped version:** 4.1.19~ynh5
+**Shipped version:** 4.4.6~ynh1
 
 ## Screenshots
 
