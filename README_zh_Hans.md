@@ -19,7 +19,7 @@
 Jeedom is an home automation software.
 
 
-**分发版本：** 4.1.19~ynh5
+**分发版本：** 4.4.7~ynh1
 
 ## 截图
 
