@@ -5,7 +5,7 @@ EZ editatu eskuz.
 
 # Jeedom YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/jeedom.svg)](https://ci-apps.yunohost.org/ci/apps/jeedom/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
 
 [![Instalatu Jeedom YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
@@ -19,7 +19,7 @@ EZ editatu eskuz.
 Jeedom is an home automation software.
 
 
-**Paketatutako bertsioa:** 4.1.19~ynh5
+**Paketatutako bertsioa:** 4.4.14~ynh1
 
 ## Pantaila-argazkiak
 
