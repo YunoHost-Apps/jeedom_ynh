@@ -5,7 +5,7 @@
 
 # YunoHost 上的 Jeedom
 
-[![集成程度](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![工作状态](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+[![集成程度](https://dash.yunohost.org/integration/jeedom.svg)](https://ci-apps.yunohost.org/ci/apps/jeedom/) ![工作状态](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
 
 [![使用 YunoHost 安装 Jeedom](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
@@ -19,7 +19,7 @@
 Jeedom is an home automation software.
 
 
-**分发版本：** 4.1.19~ynh5
+**分发版本：** 4.4.16~ynh1
 
 ## 截图
 
