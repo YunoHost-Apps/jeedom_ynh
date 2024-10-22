@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
-# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -20,13 +15,10 @@ ynh_backup "$install_dir"
 # SYSTEM CONFIGURATION
 #=================================================
 
-# Backup the PHP-FPM configuration
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-# Backup the nginx configuration
 ynh_backup "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
-# Backup the cron configuration
 ynh_backup "/etc/cron.d/${app}"
 ynh_backup "/etc/cron.d/${app}_watchdog"
 
