@@ -5,7 +5,7 @@ NON debe editarse manualmente.
 
 # Jeedom para YunoHost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/jeedom.svg)](https://dash.yunohost.org/appci/app/jeedom) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+[![Nivel de integración](https://dash.yunohost.org/integration/jeedom.svg)](https://ci-apps.yunohost.org/ci/apps/jeedom/) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
 
 [![Instalar Jeedom con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
@@ -19,7 +19,7 @@ NON debe editarse manualmente.
 Jeedom is an home automation software.
 
 
-**Versión proporcionada:** 4.1.19~ynh5
+**Versión proporcionada:** 4.4.19~ynh1
 
 ## Capturas de pantalla
 
