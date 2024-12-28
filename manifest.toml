@@ -52,7 +52,7 @@ ram.runtime = "200M"
 [resources]
     [resources.sources.main]
     url = "https://github.com/jeedom/core/archive/refs/tags/4.4.19.tar.gz"
-    sha256 = "888e1399c14cf1d5399ee52f9b044105e46793f7a8f4b060e4f07d04d1c094bd"
+    sha256 = "3f07ed8e3cea22cbeb49790bfcd1c0f2c8a64639e354dec8508e3921ae286e30"
 
     autoupdate.strategy = "latest_github_tag"
 
