@@ -5,7 +5,9 @@
 
 # Jeedom для YunoHost
 
-[![Уровень интеграции](https://dash.yunohost.org/integration/jeedom.svg)](https://ci-apps.yunohost.org/ci/apps/jeedom/) ![Состояние работы](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Состояние сопровождения](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+[![Уровень интеграции](https://apps.yunohost.org/badge/integration/jeedom)](https://ci-apps.yunohost.org/ci/apps/jeedom/)
+![Состояние работы](https://apps.yunohost.org/badge/state/jeedom)
+![Состояние сопровождения](https://apps.yunohost.org/badge/maintained/jeedom)
 
 [![Установите Jeedom с YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 

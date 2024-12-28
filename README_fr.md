@@ -5,7 +5,9 @@ Il NE doit PAS être modifié à la main.
 
 # Jeedom pour YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/jeedom.svg)](https://ci-apps.yunohost.org/ci/apps/jeedom/) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/jeedom.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/jeedom.maintain.svg)
+[![Niveau d’intégration](https://apps.yunohost.org/badge/integration/jeedom)](https://ci-apps.yunohost.org/ci/apps/jeedom/)
+![Statut du fonctionnement](https://apps.yunohost.org/badge/state/jeedom)
+![Statut de maintenance](https://apps.yunohost.org/badge/maintained/jeedom)
 
 [![Installer Jeedom avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=jeedom)
 
