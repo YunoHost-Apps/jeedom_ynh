@@ -25,11 +25,10 @@ ynh_setup_source --dest_dir="$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R "$app:www-data" "$install_dir"
 
-# FIXME: is it used?? It's not even reboot persistent…
 # Create tmp required by Jeedom
-mkdir -p /tmp/jeedom
-chmod 750 /tmp/jeedom
-chown "$app:www-data" -R /tmp/jeedom
+mkdir -p "/tmp/jeedom/cache"
+chmod -R 775 "/tmp/jeedom"
+chown -R "$app:www-data" "/tmp/jeedom"
 
 #=================================================
 # ADD A CONFIGURATION
