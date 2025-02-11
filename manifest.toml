@@ -7,7 +7,7 @@ name = "Jeedom"
 description.en = "Home automation application"
 description.fr = "Application de domotique"
 
-version = "4.1.19~ynh5"
+version = "4.4.19~ynh1"
 
 maintainers = []
 
@@ -22,8 +22,11 @@ cpe = "cpe:2.3:a:jeedom:jeedom"
 yunohost = ">= 11.2"
 architectures = "all"
 multi_instance = false
+
 ldap = true
+
 sso = true
+
 disk = "200M"
 ram.build = "200M"
 ram.runtime = "200M"
@@ -51,8 +54,8 @@ ram.runtime = "200M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/jeedom/core/archive/refs/tags/4.1.19.tar.gz"
-    sha256 = "be50f67286d1533c93584f3653d4669b36d649033ad1750342b704f9a824476a"
+    url = "https://github.com/jeedom/core/archive/refs/tags/4.4.19.tar.gz"
+    sha256 = "129ab1d9359c694e5964a7a01a506ce5be6044599112b72d7b316cae0dee1c43"
 
     autoupdate.strategy = "latest_github_tag"
 
@@ -65,23 +68,53 @@ ram.runtime = "200M"
 
     [resources.apt]
     packages = [
-        "unzip", "cron", "locate", "tar",
-        "logrotate", "dos2unix", "python3", "python3-pip", "libexpat1",
-        "xvfb", "cutycapt", "xauth", "duplicity", "at", "ffmpeg",
-
-        "php7.4-curl",
-        "php7.4-gd",
-        "php7.4-imap",
-        "php7.4-xml",
-        "php7.4-soap",
-        "php7.4-xmlrpc",
-        "php7.4-dev",
-        "php7.4-zip",
-        "php7.4-ssh2",
-        "php7.4-mbstring",
-        "php7.4-ldap",
-        "php7.4-mysql",
-
+        "ntp",
+        "unzip",
+        "curl",
+        "cron",
+        "locate",
+        "tar",
+        "telnet",
+        "wget",
+        "logrotate",
+        "dos2unix",
+        "ntpdate",
+        "htop",
+        "iotop",
+        "iftop",
+        "smbclient",
+        "python3",
+        "python3-pip",
+        "libexpat1",
+        "xvfb",
+        "cutycapt",
+        "xauth",
+        "at",
+        "espeak",
+        "net-tools",
+        "nmap",
+        "ffmpeg",
+        "usbutils",
+        "gettext",
+        "libcurl3-gnutls",
+        "librsync-dev",
+        "iputils-ping",
+        "php8.2-json",
+        "php8.2-mysql",
+        "php8.2-curl",
+        "php8.2-gd",
+        "php8.2-imap",
+        "php8.2-xml",
+        "php8.2-opcache",
+        "php8.2-soap",
+        "php8.2-xmlrpc",
+        "php8.2-dev",
+        "php8.2-zip",
+        "php8.2-ssh2",
+        "php8.2-mbstring",
+        "php8.2-ldap",
+        "php8.2-yaml",
+        "php8.2-snmp",
         "mariadb-server",
     ]
 

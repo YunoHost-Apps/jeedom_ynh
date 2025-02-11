@@ -25,11 +25,10 @@ ynh_setup_source --dest_dir="$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R "$app:www-data" "$install_dir"
 
-# FIXME: is it used?? It's not even reboot persistent…
 # Create tmp required by Jeedom
-mkdir -p /tmp/jeedom
-chmod 750 /tmp/jeedom
-chown "$app:www-data" -R /tmp/jeedom
+mkdir -p "/tmp/jeedom/cache/"
+chmod -R 775 "/tmp/jeedom/"
+chown -R "$app:www-data" "/tmp/jeedom/"
 
 #=================================================
 # ADD A CONFIGURATION
@@ -47,7 +46,7 @@ chown "$app:$app" "$install_dir/core/config/common.config.php"
 ynh_script_progression --message="Installing $app..."
 
 # Install Jeedom
-"php$phpversion" "$install_dir/install/install.php" mode=force
+ynh_exec_warn_less "php$phpversion" "$install_dir/install/install.php" mode=force
 
 # Configure LDAP and the Admin User and access settings
 ynh_add_config --template="config.sql" --destination="$install_dir/config.sql"
