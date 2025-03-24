@@ -31,4 +31,3 @@ $CONFIG = array(
 		'password' => '__DB_PWD__',
 	),
 );
- 
