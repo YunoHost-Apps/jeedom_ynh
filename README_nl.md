@@ -21,7 +21,7 @@ Hij mag NIET handmatig aangepast worden.
 Jeedom is an home automation software.
 
 
-**Geleverde versie:** 4.4.19~ynh1
+**Geleverde versie:** 4.4.19~ynh2
 
 ## Schermafdrukken
 

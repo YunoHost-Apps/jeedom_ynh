@@ -21,7 +21,7 @@ EZ editatu eskuz.
 Jeedom is an home automation software.
 
 
-**Paketatutako bertsioa:** 4.4.19~ynh1
+**Paketatutako bertsioa:** 4.4.19~ynh2
 
 ## Pantaila-argazkiak
 

@@ -21,7 +21,7 @@ Ini TIDAK boleh diedit dengan tangan.
 Jeedom is an home automation software.
 
 
-**Versi terkirim:** 4.4.19~ynh1
+**Versi terkirim:** 4.4.19~ynh2
 
 ## Tangkapan Layar
 
