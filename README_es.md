@@ -3,7 +3,7 @@ Este archivo README esta generado automaticamente<https://github.com/YunoHost/ap
 No se debe editar a mano.
 -->
 
-# Jeedom para Yunohost
+# Jeedom para YunoHost
 
 [![Nivel de integración](https://apps.yunohost.org/badge/integration/jeedom)](https://ci-apps.yunohost.org/ci/apps/jeedom/)
 ![Estado funcional](https://apps.yunohost.org/badge/state/jeedom)

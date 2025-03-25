@@ -39,7 +39,7 @@ Jeedom is an home automation software.
 
 Bidali `pull request`a [`testing` abarrera](https://github.com/YunoHost-Apps/jeedom_ynh/tree/testing).
 
-`testing` abarra probatzeko, ondorengoa egin:
+`testing` abarra probatzeko, honakoa egin:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/jeedom_ynh/tree/testing --debug
