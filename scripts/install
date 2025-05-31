@@ -38,9 +38,6 @@ ynh_script_progression "Adding $app's configuration files..."
 
 ynh_config_add --template="common.config.php" --destination="$install_dir/core/config/common.config.php"
 
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/core/config/common.config.php"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown "$app:$app" "$install_dir/core/config/common.config.php"
-
 #=================================================
 # INSTALL JEEDOM
 #=================================================
@@ -51,7 +48,7 @@ ynh_hide_warnings "php$php_version" "$install_dir/install/install.php" mode=forc
 
 # Configure LDAP and the Admin User and access settings
 ynh_config_add --template="config.sql" --destination="$install_dir/config.sql"
-ynh_mysql_db_shell " < "$install_dir/config.sql""
+ynh_mysql_db_shell < $install_dir/config.sql
 ynh_safe_rm "$install_dir/config.sql"
 
 #REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
