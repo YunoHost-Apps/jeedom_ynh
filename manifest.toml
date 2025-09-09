@@ -7,7 +7,7 @@ name = "Jeedom"
 description.en = "Home automation application"
 description.fr = "Application de domotique"
 
-version = "4.4.19~ynh2"
+version = "4.4.20~ynh1"
 
 maintainers = []
 
@@ -54,8 +54,8 @@ ram.runtime = "200M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/jeedom/core/archive/refs/tags/4.4.19.tar.gz"
-    sha256 = "5977aca3e88e0d6960a790b709dfda1c35cc8306bb6129b8f83ad1891b6d5201"
+    url = "https://github.com/jeedom/core/archive/refs/tags/4.4.20.tar.gz"
+    sha256 = "225b213d3c05d7b07ba593802a88b2a5678b5ead4be8c6bda672a8d8d0bd7aac"
 
     autoupdate.strategy = "latest_github_tag"
 
