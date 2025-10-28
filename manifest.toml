@@ -116,12 +116,6 @@ ram.runtime = "200M"
         "php8.2-yaml",
         "php8.2-snmp",
         "mariadb-server",
-    ]
-
-    [resources.apt.extras.nonfree]
-    repo = "deb http://deb.debian.org/debian bookworm contrib non-free"
-    key = "https://ftp-master.debian.org/keys/release-11.asc"
-    packages = [
         "libsox-fmt-mp3",
         "sox",
         "libttspico-utils",
