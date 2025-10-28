@@ -119,7 +119,7 @@ ram.runtime = "200M"
     ]
 
     [resources.apt.extras.nonfree]
-    repo = "deb http://deb.debian.org/debian bullseye contrib non-free"
+    repo = "deb http://deb.debian.org/debian bookworm contrib non-free"
     key = "https://ftp-master.debian.org/keys/release-11.asc"
     packages = [
         "libsox-fmt-mp3",
