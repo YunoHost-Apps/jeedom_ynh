@@ -101,6 +101,7 @@ ram.runtime = "200M"
         "libcurl3-gnutls",
         "librsync-dev",
         "iputils-ping",
+        "php8.2",
         "php8.2-fpm",
         "php8.2-common",
         "php8.2-json",
