@@ -129,7 +129,7 @@ ram.runtime = "200M"
     packages = [
         "libsox-fmt-mp3",
         "sox",
-        "libttspico-utils",
+     #   "libttspico-utils",
         "espeak",
         "mbrola",
         "brltty",
