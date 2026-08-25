@@ -7,7 +7,7 @@ name = "Jeedom"
 description.en = "Home automation application"
 description.fr = "Application de domotique"
 
-version = "4.4.19~ynh2"
+version = "4.6.1~ynh1"
 
 maintainers = []
 
@@ -54,8 +54,8 @@ ram.runtime = "200M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/jeedom/core/archive/refs/tags/4.4.19.tar.gz"
-    sha256 = "5977aca3e88e0d6960a790b709dfda1c35cc8306bb6129b8f83ad1891b6d5201"
+    url = "https://github.com/jeedom/core/archive/refs/tags/4.6.1.tar.gz"
+    sha256 = "0df3238f97075528579b5f804efd07acf9d3bed0c6f4a0a80d9672827421a250"
 
     autoupdate.strategy = "latest_github_tag"
 
@@ -100,25 +100,22 @@ ram.runtime = "200M"
         "libcurl3-gnutls",
         "librsync-dev",
         "iputils-ping",
-        "php8.2",
-        "php8.2-fpm",
-        "php8.2-common",
-        "php8.2-json",
-        "php8.2-mysql",
-        "php8.2-curl",
-        "php8.2-gd",
-        "php8.2-imap",
-        "php8.2-xml",
-        "php8.2-opcache",
-        "php8.2-soap",
-        "php8.2-xmlrpc",
-        "php8.2-dev",
-        "php8.2-zip",
-        "php8.2-ssh2",
-        "php8.2-mbstring",
-        "php8.2-ldap",
-        "php8.2-yaml",
-        "php8.2-snmp",
+        "php8.4-json",
+        "php8.4-mysql",
+        "php8.4-curl",
+        "php8.4-gd",
+        "php8.4-imap",
+        "php8.4-xml",
+        "php8.4-opcache",
+        "php8.4-soap",
+        "php8.4-xmlrpc",
+        "php8.4-dev",
+        "php8.4-zip",
+        "php8.4-ssh2",
+        "php8.4-mbstring",
+        "php8.4-ldap",
+        "php8.4-yaml",
+        "php8.4-snmp",
         "mariadb-server",
     ]
 
