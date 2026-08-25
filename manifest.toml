@@ -126,9 +126,10 @@ ram.runtime = "200M"
     repo = "deb http://deb.debian.org/debian bookworm contrib non-free"
     key = "https://ftp-master.debian.org/keys/release-11.asc"
     packages = [
+        "mariadb-server",
         "libsox-fmt-mp3",
         "sox",
-     #   "libttspico-utils",
+     #  "libttspico-utils",
         "espeak",
         "mbrola",
         "brltty",
