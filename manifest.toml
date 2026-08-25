@@ -100,6 +100,9 @@ ram.runtime = "200M"
         "libcurl3-gnutls",
         "librsync-dev",
         "iputils-ping",
+        "php8.2",
+        "php8.2-fpm",
+        "php8.2-common",
         "php8.2-json",
         "php8.2-mysql",
         "php8.2-curl",
@@ -120,12 +123,12 @@ ram.runtime = "200M"
     ]
 
     [resources.apt.extras.nonfree]
-    repo = "deb http://deb.debian.org/debian bullseye contrib non-free"
+    repo = "deb http://deb.debian.org/debian bookworm contrib non-free"
     key = "https://ftp-master.debian.org/keys/release-11.asc"
     packages = [
         "libsox-fmt-mp3",
         "sox",
-        "libttspico-utils",
+     #   "libttspico-utils",
         "espeak",
         "mbrola",
         "brltty",
