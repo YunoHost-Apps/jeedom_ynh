@@ -133,3 +133,6 @@ ram.runtime = "200M"
 
     [resources.composer]
     version = "2.8.3"
+
+    [resources.nodejs]
+    version = "24"
