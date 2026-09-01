@@ -80,7 +80,7 @@ ram.runtime = "200M"
         "wget",
         "logrotate",
         "dos2unix",
-        "ntpdate",
+        "ntpdate\\|ntpsec-ntpdate",
         "htop",
         "iotop",
         "iftop",
